@@ -3,7 +3,7 @@
     <el-breadcrumb separator-class="el-icon-arrow-right" style="font-size: 12px;">
       <el-breadcrumb-item>首页</el-breadcrumb-item>
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
-      <el-breadcrumb-item>商品增加</el-breadcrumb-item>
+      <el-breadcrumb-item>商品编辑</el-breadcrumb-item>
     </el-breadcrumb>
     <div style="height: 15px;"></div>
     <el-form ref="goods" :model="goods" label-position="right" :rules="rules" label-width="110px" size="small">
@@ -50,6 +50,7 @@
           :on-success="handlePictureCardSuccess"
           accept="image/jpeg,image/jpg,image/png"
           :limit="4"
+          :file-list="productDetailIconArr"
         >
           <i class="el-icon-plus"></i>
         </el-upload>
@@ -136,7 +137,7 @@
 
       <el-form-item>
         <!--<el-button type="primary" @click="submitForm('goods')">保存</el-button> -->
-        <el-button type="primary" @click="submitForm('goods')">提交</el-button>
+        <el-button type="primary" @click="updateForm('goods')">保存</el-button>
         <el-button type="primary" @click="goBack()">返回</el-button>
       </el-form-item>
     </el-form>
@@ -178,10 +179,8 @@
           productLabels: '', //商品标签
           productUnit: '', //商品单位
           productDesc: '', //商品简单描述
-          // region: '',
-          // date1: '',
-          // date2: '',
-          // delivery: false,
+          productNumber:'',
+          hashNumber: '',
           productDetailField: '', //商品属性
           categoryArrs: [], //类目编码数组
           categoryNewArrs:{},
@@ -192,14 +191,10 @@
         myHeaders: {
           adminToken: configs.adminToken
         },
-        logos:[
-          {'name':'品牌','value':'每时美味生鲜'}
-        ],
-        detailIcons:[],
         showReturnVisible: true,
         dialogVisible: false,
         dialogImageUrl: '',
-        dynamicTags: ['香', '好吃', '美味', '脆嫩','喜欢'], //商品标签
+        dynamicTags: [], //商品标签
         inputVisible: false,
         inputValue: '',
         // editorOption: {},
@@ -207,6 +202,11 @@
         iconAction:configs.uploadPicUrl, //商品图片上传请求路劲
         myQuillEditor: quillConfig,
         baseUrl: configs.baseRootUrl,
+        productDetailIconArr:[],
+        detailIcons:[],
+        logos:[
+          {'name':'品牌','value':'每时美味生鲜'}
+        ],
         //表单数据校验规则
         rules:{
           productName :[
@@ -277,8 +277,77 @@
      * 计算属性
      * **/
     mounted() {
+      let that = this ;
+
+      //获取所有分类
+      this.getCategoryData() ;
+
       //页面切换传递过来的参数
-      //console.log(this.$route.params.id, this.id)
+      let productNumber = this.$route.params.productNumber ;
+      let hashNumber = this.$route.params.hashNumber ;
+      console.log("productNumber="+productNumber);
+      console.log("hashNumber="+hashNumber);
+      let tempObj = {
+        'productNumber': productNumber,
+        'hashNumber': hashNumber
+      }
+
+      //商品
+      this.$api.getProductAndDetailInfoByNumber(tempObj,
+      success=>{
+        let data = success.data ;
+        console.log("goods="+JSON.stringify(data))
+        let tags = data.goodLabels.split("*");
+        that.dynamicTags = tags ;
+
+        that.goods.productName = data.goodName;
+        that.goods.productPrice = data.goodPrice;
+        that.goods.productStock = data.goodStock;
+        that.goods.productStandard =data.goodStandard;
+        that.goods.productTips = data.goodTips;
+        that.goods.productUnit = data.goodUnit;
+        that.goods.productDesc = data.goodDescription;
+        that.goods.productNumber = productNumber;
+        that.goods.hashNumber = hashNumber;
+        that.goods.productIcon = data.goodIcon;
+        that.goods.productDetailField =data.productDetailField;
+        console.log()
+        let arrs = data.productDetailIcon.split("&");
+        let len = arrs.length;
+        for (let i=0;i < len;i++){
+          let obj = {
+            'name': i,
+            'url': that.baseUrl+arrs[i],
+            'response':{'code':0,'message':'成功','data':[arrs[i]]
+            }
+          }
+          that.productDetailIconArr.push(obj);
+          that.detailIcons.push(obj);
+        }
+        that.goods.productDetailDesc =data.productDetailDescription;
+      },
+      fail=>{
+        that.$message.error(fail.message);
+      });
+
+
+      //商品分类
+      this.$api.getCategoryInfoByNumber(tempObj,
+        success=>{
+          // console.log("selectedCategoryList="+JSON.stringify(success.data))
+          let selectedCategoryList = success.data ;
+          let len = selectedCategoryList.length ;
+          for (let i=0; i<len; i++){
+            let obj = selectedCategoryList[i].categoryNumber+'&'+ selectedCategoryList[i].goodHashNumber;
+            that.goods.categoryArrs.push(obj)
+          }
+          // console.log("that.goods.categoryArrs="+JSON.stringify(that.goods.categoryArrs))
+        },
+        fail=>{
+          that.$message.error(fail.message);
+        });
+
+
       window.onbeforeunload = function (e) {
         e = e || window.event;
         // 兼容IE8和Firefox 4之前的版本
@@ -288,10 +357,6 @@
         // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
         return '关闭提示';
       };
-      this.getCategoryData() ;
-
-      //
-      var vm =this;
 
     },
 
@@ -305,10 +370,25 @@
 
     created: function(){
       console.log("configs.uploadPicUrl="+ configs.uploadPicUrl)
+      console.log("configs.testContent="+ configs.testContent)
+      //this.iconAction = configs.uploadPicUrl ;
     },
 
     methods: {
+      goBack() {
+        //返回列表
+        this.$confirm('当前页面数据未保存，确定要离开?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.showReturnVisible = false ;
+          this.$router.go(-1);
+        }).catch(() => {
 
+        });
+
+      },
       /**
        * 获取类目数据
        */
@@ -326,7 +406,7 @@
       /**
        * 提交保存
        * */
-      submitForm(formName) {
+      updateForm(formName) {
         let that = this ;
         console.log('submit!');
 
@@ -334,27 +414,20 @@
 
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            // console.log(valid)
-            // console.log("that.detailIcons"+JSON.stringify(that.detailIcons))
-            const loading = this.$loading({
-              lock: true,
-              text: '保存中...',
-              spinner: 'el-icon-loading',
-              background: 'rgba(0, 0, 0, 0.7)'
-            });
-
+            console.log(valid)
 
             let tmpStr = [];
             for (let j=0;j<that.detailIcons.length;j++){
               tmpStr.push(that.detailIcons[j].response.data[0])
             }
             if (tmpStr.length > 1) {
-              this.goods.productDetailIcon = tmpStr.join("&");
+              that.goods.productDetailIcon = tmpStr.join("&");
             }else {
-              this.goods.productDetailIcon = tmpStr.join("");
+              that.goods.productDetailIcon = tmpStr.join("");
             }
 
-            that.goods.productLabels = this.dynamicTags.join("*")
+
+            this.goods.productLabels = this.dynamicTags.join("*")
             // 组装数据
             let arrs = []
             for (let i=0;i < this.goods.categoryArrs.length; i++){
@@ -370,16 +443,14 @@
             this.goods.categoryNewArrs = arrs ;
             let content = this.goods;
             console.log("提交内容为："+JSON.stringify(content)) ;
-            that.$api.submitProductInfo(JSON.stringify(content),
+            that.$api.updateProductInfo(JSON.stringify(content),
               success=>{
                 that.$message.success(success.message);
                 that.showReturnVisible = false ;
-                loading.close();
                 //返回商品列表
                 that.$router.push({ name: 'ProductInfo', params: { }})
               },
               fail=>{
-                loading.close();
                 that.$message.error(fail.message);
             });
           } else {
@@ -392,25 +463,7 @@
        * 重置
        * **/
       resetForm(formName) {
-        this.$confirm('此操作将重置内容, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$refs[formName].resetFields();
-          this.$message({
-            type: 'success',
-            message: '已重置'
-          });
-
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消'
-          });
-        });
-
-
+        this.$refs[formName].resetFields();
       },
 
       /**
@@ -439,48 +492,32 @@
       /**
        * 处理 商品明细图
        * **/
-      handlePictureCardSuccess(res, file){
+      handlePictureCardSuccess(res, file,fileList){
         console.log("res="+JSON.stringify(res))
         console.log("file="+JSON.stringify(file))
-        // let arrNew=new Array();
-        // arrNew.push(this.goods.productDetailIcon);
-        // if (file.status == 'success'){
-        //   let res = file.response ;
-        //   if (res.code == 0){
-        //     arrNew.push(res.data[0]);
-        //     let icons = this.goods.productDetailIcon;
-        //     if (icons.length > 0) {
-        //       this.goods.productDetailIcon = arrNew.join("&");
-        //     }else {
-        //       this.goods.productDetailIcon = arrNew.join("");
-        //     }
-        //     this.$message.success(res.message);
-        //     console.log("商品明细图:"+this.goods.productDetailIcon) ;
-        //   } else{
-        //     this.$message.error(res.message);
-        //   }
-        // } else {
-        //   this.$message.error("图像上传失败");
-        // }
+        console.log("fileList="+JSON.stringify(fileList))
+        // console.log("productDetailIconArr="+JSON.stringify(this.productDetailIconArr))
+        this.detailIcons = fileList;
+        let arrNew=new Array();
+        arrNew.push(this.goods.productDetailIcon);
         if (file.status == 'success'){
           let res = file.response ;
           if (res.code == 0){
-            let obj = {
-              'name': file.uid,
-              'url': this.baseUrl+res.data[0],
-              'response':{'code':0,'message':'成功','data':[res.data[0]]}
+            arrNew.push(res.data[0]);
+            let icons = this.goods.productDetailIcon;
+            if (icons.length > 0) {
+              this.goods.productDetailIcon = arrNew.join("&");
+            }else {
+              this.goods.productDetailIcon = arrNew.join("");
             }
-            this.detailIcons.push(obj);
             this.$message.success(res.message);
-            // console.log("商品明细图:"+this.goods.productDetailIcon) ;
+            console.log("商品明细图:"+this.goods.productDetailIcon) ;
           } else{
             this.$message.error(res.message);
           }
         } else {
           this.$message.error("图像上传失败");
         }
-
-        console.log("this.detailIcons"+JSON.stringify(this.detailIcons))
       },
 
       /**
@@ -501,31 +538,11 @@
       },
 
       handleRemove(file, fileList) {
-        // console.log(file, fileList);
+        console.log(file, fileList);
         console.log("file="+JSON.stringify(file))
-        // console.log("fileList="+JSON.stringify(fileList))
-
-
-        if (file.status == 'success'){
-          let res = file.response ;
-          if (res.code == 0){
-            let uid = file.uid ;
-            let len = this.detailIcons.length ;
-            for (let i=0; i<len; i++){
-              if (this.detailIcons[i].name === uid){
-                this.detailIcons.splice(i,1)
-              }
-            }
-            this.$message.success(res.message);
-            // console.log("商品明细图:"+this.goods.productDetailIcon) ;
-          } else{
-            this.$message.error(res.message);
-          }
-        } else {
-          this.$message.error("图像上传失败");
-        }
-
-        console.log("this.detailIcons"+JSON.stringify(this.detailIcons))
+        console.log("fileList="+JSON.stringify(fileList))
+        // console.log("productDetailIconArr="+JSON.stringify(this.productDetailIconArr))
+        this.detailIcons = fileList;
       },
 
       /**

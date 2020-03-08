@@ -85,8 +85,8 @@
             <span v-if="scope.row.payStatus === 'SUCCESS' && scope.row.orderStatus === 'NEW'">待发货</span>
             <span v-if="scope.row.payStatus === 'SUCCESS' && scope.row.orderStatus === 'SHIPMENT'">待收货</span>
             <span v-if="scope.row.payStatus === 'SUCCESS' && scope.row.orderStatus === 'REVIEW'">待评价</span>
-            <span v-if="scope.row.payStatus === 'CLOSE' && scope.row.orderStatus === 'FINISHED'">已完成</span>
-            <span v-if="scope.row.payStatus === 'CLOSE' && scope.row.orderStatus === 'CANCEL'">已取消</span>
+            <span v-if="scope.row.payStatus === 'CLOSED' && scope.row.orderStatus === 'FINISHED'">已完成</span>
+            <span v-if="scope.row.payStatus === 'CLOSED' && scope.row.orderStatus === 'CANCEL'">已取消</span>
           </el-tag>
         </template>
       </el-table-column>
@@ -207,7 +207,6 @@
 </template>
 
 <script>
-  import common from '../../utils/common.js'
 
   export default {
     name: 'OrderTable',

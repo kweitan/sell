@@ -4,10 +4,10 @@ import types from "./../types";
 const user = {
   namespaced: true,
   state : {
-      adminToken:'' || localStorage.getItem("adminToken"),
-      avatarUrl: '' || localStorage.getItem("avatarUrl"),
-      sellerName: '' || localStorage.getItem("sellerName"),
-      isLogin: '0' || localStorage.getItem("isLogin")
+      adminToken: '' || sessionStorage.getItem("adminToken"),
+      avatarUrl: '' || sessionStorage.getItem("avatarUrl"),
+      sellerName: '' || sessionStorage.getItem("sellerName"),
+      isLogin: '0' || sessionStorage.getItem("isLogin")
   },
 
 
@@ -26,20 +26,20 @@ const user = {
           state.avatarUrl = userinfo.avatarUrl;
           state.sellerName = userinfo.sellerName;
           state.isLogin = userinfo.isLogin;
-          localStorage.setItem("adminToken", userinfo.adminToken);
-          localStorage.setItem("avatarUrl", userinfo.avatarUrl);
-          localStorage.setItem("sellerName", userinfo.sellerName);
-          localStorage.setItem("isLogin", userinfo.isLogin);
+        sessionStorage.setItem("adminToken", userinfo.adminToken);
+        sessionStorage.setItem("avatarUrl", userinfo.avatarUrl);
+        sessionStorage.setItem("sellerName", userinfo.sellerName);
+        sessionStorage.setItem("isLogin", userinfo.isLogin);
       },
       [types.CLEARUSERINFO](state){
           state.adminToken = '';
           state.avatarUrl = '';
           state.sellerName = '';
-          state.isLogin = 0;
-          localStorage.setItem("adminToken","");
-          localStorage.setItem("avatarUrl","");
-          localStorage.setItem("sellerName", "");
-          localStorage.setItem("isLogin", '0');
+          state.isLogin = '0';
+        sessionStorage.setItem("adminToken","");
+        sessionStorage.setItem("avatarUrl","");
+        sessionStorage.setItem("sellerName", "");
+        sessionStorage.setItem("isLogin", '0');
       }
   }
 }

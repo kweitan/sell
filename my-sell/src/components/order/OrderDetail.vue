@@ -86,7 +86,18 @@
           <el-row>
             <el-col :span="18">
               <el-form-item label="备注：">
-                <el-button type="primary" size="small">修改备注</el-button>
+                <el-button type="primary" size="small" v-if="modifyRemark == false && orderInfo.orderRemark == undefined" @click="modifyRemarks">修改备注</el-button>
+                <el-form :inline="true" v-if="modifyRemark == true || orderInfo.orderRemark != undefined"  class="demo-form-inline" size="small">
+                  <el-form-item>
+                    <el-input v-model="orderInfo.orderRemark" placeholder="订单备注"></el-input>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="onSave">保存</el-button>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="onCancel">取消</el-button>
+                  </el-form-item>
+                </el-form>
               </el-form-item>
             </el-col>
           </el-row>
@@ -166,7 +177,7 @@
           订单实付金额：<span style="color: red;font-weight: bold;">{{orderInfo.actAmount}}元</span>&nbsp;&nbsp;
         </template>
         <template>
-          (满100元顺丰包邮)
+          (默认运费15元，满100元顺丰包邮)
         </template>
 
       </div>
@@ -191,10 +202,14 @@
         },
         baseUrl: configs.baseRootUrl,
         status: '',
-        statusNumber: 0
+        statusNumber: 0,
+        modifyRemark: false
       }
     },
     mounted() {
+
+      console.log("this.orderInfo.orderRemark="+this.orderInfo.orderRemark)
+
       let that = this ;
 
       //页面切换传递过来的参数
@@ -225,6 +240,35 @@
       goBack() {
         //返回列表
         this.$router.go(-1);
+      },
+      modifyRemarks(){
+        this.modifyRemark = true ;
+      },
+      onSave(){
+        let that = this ;
+
+        //页面切换传递过来的参数
+        let orderNumber = that.orderInfo.orderNumber ;
+        let hashNumber = that.orderInfo.hashNumber ;
+        let orderRemark = that.orderInfo.orderRemark
+        console.log("orderNumber="+orderNumber);
+        console.log("hashNumber="+hashNumber);
+        let tempObj = {
+          'orderNumber': orderNumber,
+          'hashNumber': hashNumber,
+          'orderRemark': orderRemark
+        }
+        //订单详情
+        this.$api.saveOrderRemark(tempObj,
+          success=>{
+            that.$message.success(success.message);
+          },
+          fail=>{
+            that.$message.error(fail.message);
+          });
+      },
+      onCancel(){
+        this.modifyRemark = false ;
       }
     }
   }
@@ -236,7 +280,7 @@
     padding: 15px;
     overflow: hidden;
     border-radius: 2px;
-    width: 600px;
+    width: 672px;
   }
 
   .el-form-item {

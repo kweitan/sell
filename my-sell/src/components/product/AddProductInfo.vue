@@ -138,6 +138,7 @@
         <!--<el-button type="primary" @click="submitForm('goods')">保存</el-button> -->
         <el-button type="primary" @click="submitForm('goods')">提交</el-button>
         <el-button type="primary" @click="goBack()">返回</el-button>
+        <!--<el-button type="primary" @click="goBack()">返回</el-button>-->
       </el-form-item>
     </el-form>
   </div>
@@ -190,7 +191,7 @@
           productDetailDesc: '' //商品详细描述
         },
         myHeaders: {
-          adminToken: configs.adminToken
+          adminToken: this.$store.getters.adminToken
         },
         logos:[
           {'name':'品牌','value':'每时美味生鲜'}
@@ -308,7 +309,21 @@
     },
 
     methods: {
+      goBack(){
+        console.log("goback")
+        //返回列表
+        this.$confirm('当前页面数据未保存，确定要离开?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.showReturnVisible = false ;
+          this.$router.go(-1);
+        }).catch(() => {
 
+        });
+
+      },
       /**
        * 获取类目数据
        */
@@ -349,7 +364,7 @@
               tmpStr.push(that.detailIcons[j].response.data[0])
             }
             if (tmpStr.length > 1) {
-              this.goods.productDetailIcon = tmpStr.join("&");
+              this.goods.productDetailIcon = tmpStr.join("*");
             }else {
               this.goods.productDetailIcon = tmpStr.join("");
             }
@@ -591,6 +606,7 @@
         this.inputVisible = false;
         this.inputValue = '';
       }
+
     }
   }
 </script>

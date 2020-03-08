@@ -103,7 +103,7 @@
           {'name':'否','value':0}
         ],
         myHeaders: {
-          adminToken: configs.adminToken
+          adminToken: this.$store.getters.adminToken
         },
         iconAction:configs.uploadPicUrl, //商品图片上传请求路劲
         isSave: false,

@@ -90,7 +90,7 @@
           categoryIcon: ''
         } ,
         myHeaders: {
-          adminToken: configs.adminToken
+          adminToken: this.$store.getters.adminToken
         },
         iconAction:configs.uploadPicUrl, //商品图片上传请求路劲
         isSave: false,
@@ -126,6 +126,9 @@
        * 图像上传前的处理
        * **/
       beforeAvatarUpload(file) {
+
+        console.log("myHeaders="+JSON.stringify(this.myHeaders))
+
         const isJPG = file.type === 'image/jpeg';
         const isPNG = file.type === 'image/png';
         const isLt2M = file.size / 1024 / 1024 < 2;

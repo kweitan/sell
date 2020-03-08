@@ -309,6 +309,14 @@ function selectOrderDetail(params,success,failure) {
 }
 
 /*
+ * 保存订单备注
+ */
+function saveOrderRemark(params,success,failure) {
+  let url = "/admin/order/saveOrderRemark" ;
+  return newGetAxios('GET', url, params, success, failure)
+}
+
+/*
  * 修改支付金额接口
  */
 function modifyActPayFee(params,success,failure) {
@@ -522,5 +530,8 @@ export default {
   },
   modifyProductReview: function (params,success,failure) {
     return modifyProductReview(params,success,failure)
+  },
+  saveOrderRemark: function (params,success,failure) {
+    return saveOrderRemark(params,success,failure)
   }
 }

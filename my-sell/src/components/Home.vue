@@ -84,7 +84,7 @@
       </el-container>
     </el-container>
     <audio id="notice" loop="loop">
-      <source src="./../assets/mp3/song.mp3" type="audio/mpeg" />
+      <source src="./../assets/mp3/order.mp3" type="audio/mpeg" />
     </audio>
   </div>
 </template>
@@ -95,13 +95,15 @@
 
   import WebsocketHeartbeatJs from 'websocket-heartbeat-js';
 
+
   export default {
     name: 'Home',
     data(){
       return{
         activeName: 'first',
-        sellerName: this.$store.getters.sellerName,
-        socketPath: configs.socketPath
+        sellerName: '',
+        socketPath: configs.socketPath,
+        sockets: null
       }
     },
     destroyed () {
@@ -114,10 +116,11 @@
 
       let params =  this.$route.params.loginInfo;
       if (params !== undefined && params !== 'undefined' && params !== null){
-
         let loginInfo = JSON.parse(params) ;
         that.$store.commit('user/SETUSERINFO', loginInfo);
       }
+
+      that.sellerName = that.$store.getters.sellerName;
 
       //初始化websocket
       this.init();
@@ -132,6 +135,7 @@
     methods: {
       init(){
         let that = this ;
+
         let websocketHeartbeatJs = new WebsocketHeartbeatJs({
           url: that.socketPath
         });
@@ -157,7 +161,13 @@
         }
         websocketHeartbeatJs.onreconnect = function () {
           console.log('reconnecting...');
+          console.log('that.$store.getters.isLogin...'+typeof that.$store.getters.isLogin);
+          if (that.$store.getters.isLogin == '0'){
+            console.log('close...');
+            websocketHeartbeatJs.close();
+          }
         }
+
       },
       // 语音播放
       aplayAudio () {

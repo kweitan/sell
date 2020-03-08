@@ -189,7 +189,7 @@
           productDetailDesc: '' //商品详细描述
         },
         myHeaders: {
-          adminToken: configs.adminToken
+          adminToken: this.$store.getters.adminToken
         },
         showReturnVisible: true,
         dialogVisible: false,
@@ -312,7 +312,7 @@
         that.goods.productIcon = data.goodIcon;
         that.goods.productDetailField =data.productDetailField;
         console.log()
-        let arrs = data.productDetailIcon.split("&");
+        let arrs = data.productDetailIcon.split("*");
         let len = arrs.length;
         for (let i=0;i < len;i++){
           let obj = {
@@ -421,7 +421,7 @@
               tmpStr.push(that.detailIcons[j].response.data[0])
             }
             if (tmpStr.length > 1) {
-              that.goods.productDetailIcon = tmpStr.join("&");
+              that.goods.productDetailIcon = tmpStr.join("*");
             }else {
               that.goods.productDetailIcon = tmpStr.join("");
             }

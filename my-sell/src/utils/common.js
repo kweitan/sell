@@ -18,7 +18,7 @@ var convertor = {
       result = '订单待评价' //可以继续评价
     }else if (orderStatus == 'CANCEL' &&
       payStatus == 'CLOSED') {
-      result = '订单已关闭' //表示退款或失败
+      result = '订单已取消' //表示退款或失败
     }
     return result;
   },

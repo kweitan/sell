@@ -159,7 +159,7 @@
       this.productInfo = productInfo ;
 
       // console.log("goodLabels="+productInfo.goodLabels)
-      let arrs = productInfo.goodLabels.split("&") ;
+      let arrs = productInfo.goodLabels.split("*") ;
       // console.log("goodLabels="+arrs[0])
       this.dynamicTags = arrs ;
 
